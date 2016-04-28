@@ -11,7 +11,7 @@ class Document implements Matchable
      *
      * @param array $attributes
      */
-    public function __construct(array $attributes)
+    public function __construct(array $attributes = [])
     {
         $this->attributes = $attributes;
     }

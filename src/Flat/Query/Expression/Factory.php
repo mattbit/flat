@@ -3,6 +3,7 @@
 namespace Mattbit\Flat\Query\Expression;
 
 use Mattbit\Flat\Query\Expression\Leaf\EqExpression;
+use Mattbit\Flat\Query\Expression\Leaf\Expression;
 use Mattbit\Flat\Query\Expression\Leaf\InExpression;
 use Mattbit\Flat\Query\Expression\Tree\NotExpression;
 
@@ -16,6 +17,8 @@ class Factory
      * @param $operator
      * @param $key
      * @param $reference
+     * @return ExpressionInterface
+     * @throws \Exception
      */
     public function make($operator, $key = null, $reference = null)
     {

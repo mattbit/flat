@@ -26,19 +26,10 @@ class Parser
      */
     public function parse(array $query)
     {
-        $expressions = [];
-        foreach ($query as $key => $value) {
-            $expressions[] = $this->parseExpression($value, $key);
-        }
-
-        if (count($expressions) === 1) {
-            return $expressions[0];
-        }
-
-        return new AndExpression($expressions);
+        return $this->parseExpression($query);
     }
 
-    protected function parseExpression($element, $path)
+    protected function parseExpression($element, $path = null)
     {
         $expressions = [];
 
@@ -54,7 +45,8 @@ class Parser
             if ($this->isOperator($key)) {
                 $expressions[] = $this->parseOperator($key, $value, $path);
             } else {
-                $expressions[] = $this->parseExpression($value, "{$path}.{$key}");
+                $nextPath = $path ? "{$path}.{$key}" : $key;
+                $expressions[] = $this->parseExpression($value, $nextPath);
             }
         }
 

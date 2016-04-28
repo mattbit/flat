@@ -18,6 +18,8 @@ class Storage
      */
     protected $encoder;
 
+    protected $queryParser;
+
     public function __construct(FilesystemInterface $filesystem, Encoder $encoder)
     {
         $this->filesystem = $filesystem;

@@ -129,4 +129,13 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(['John', 'Joe'], $expression->getReference());
         $this->assertEquals('name', $expression->getKey());
     }
+
+    /** @expectedException \Exception */
+    public function testThrowsExceptionWithInvalidTreeExpressionElement()
+    {
+        $this->parser->parse([
+            '$and' => 1
+        ]);
+    }
+
 }

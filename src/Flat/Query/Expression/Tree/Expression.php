@@ -3,8 +3,9 @@
 namespace Mattbit\Flat\Query\Expression\Tree;
 
 use Mattbit\Flat\Document\Matchable;
+use Mattbit\Flat\Query\Expression\ExpressionInterface;
 
-abstract class Expression
+abstract class Expression implements ExpressionInterface
 {
     protected $expressions = [];
 
