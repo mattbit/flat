@@ -1,0 +1,24 @@
+{
+    "name": "mattbit/flat",
+    "description": "Flat file document storage for PHP",
+    "keywords": ["flat", "file", "db", "document"],
+    "license": "MIT",
+    "require-dev": {
+        "symfony/var-dumper": "^3.0",
+        "phpunit/phpunit": "^5.3"
+    },
+    "authors": [
+        {
+            "name": "Matteo",
+            "email": "me@mattbit.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Mattbit\\": ["src/"]
+        }
+    },
+    "require": {
+        "league/flysystem": "^1.0"
+    }
+}
