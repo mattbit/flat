@@ -3,6 +3,10 @@
 namespace Mattbit\Flat;
 
 use Mattbit\Flat\Document\Document;
+use Mattbit\Flat\Document\Identifiable;
+use Mattbit\Flat\Query\Expression\ExpressionInterface;
+use Mattbit\Flat\Query\Matcher;
+use Mattbit\Flat\Storage\DocumentStore;
 
 class Collection
 {
@@ -12,15 +16,28 @@ class Collection
     protected $name;
 
     /**
+     * @var DocumentStore
+     */
+    protected $store;
+
+    /**
+     * @var Database
+     */
+    protected $database;
+
+    /**
      * Construct a new collection.
      *
-     * @param string           $name
-     * @param StorageInterface $storage
+     * @param Database      $database
+     * @param DocumentStore $store
+     * @param string        $name
      */
-    public function __construct($name, StorageInterface $storage)
+    public function __construct(Database $database, DocumentStore $store, $name)
     {
         $this->name = $name;
-        $this->storage = $storage;
+        $this->store = $store;
+        $this->database = $database;
+        $this->parser = $database->getParser();
     }
 
     /**
@@ -30,6 +47,7 @@ class Collection
      */
     public function drop()
     {
+        return $this->database->dropCollection($this);
     }
 
     /**
@@ -39,36 +57,38 @@ class Collection
      */
     public function truncate()
     {
+        $this->store->truncate();
     }
 
     /**
      * Insert a new document.
      *
-     * @param array|Document $document
+     * @param Identifiable $document
      *
-     * @return bool Successfull insertion.
+     * @return bool
      */
-    public function insert($document)
+    public function insert(Identifiable $document)
     {
-        if ($document instanceof Document) {
-            $document = $document->toArray();
-        }
-
-        return $this->storage->insert($document);
+        return $this->store->insertDocument($document);
     }
 
     /**
      * Update existing documents.
      *
-     * @param mixed $criteria
-     * @param mixed $updates
-     * @param bool  $multiple
+     * @param array        $criteria
+     * @param Identifiable $updated
+     * @param bool         $multiple
      *
      * @return int The count of the documents updated.
      */
-    public function update($criteria, $updates, $multiple = false)
+    public function update($criteria, Identifiable $updated, $multiple = false)
     {
-        $this->storage->update($criteria, $updates, $multiple);
+        $limit = $multiple ? 1 : null;
+        $documents = $this->onMatch($criteria, $limit);
+
+        foreach ($documents as $document) {
+            $this->store->updateDocument($updated, $multiple);
+        }
     }
 
     /**
@@ -81,24 +101,41 @@ class Collection
      */
     public function remove($criteria, $multiple = false)
     {
-        return $this->storage->remove($criteria, $multiple);
+        $limit = $multiple ? 1 : null;
+
+        $documents = $this->onMatch($criteria, $limit);
+        
+        foreach ($documents as $document) {
+            $this->store->removeDocument($document->getId());
+        }
+
+        return true;
     }
 
     /**
      * Find documents in the collection.
      *
-     * @param mixed $criteria
+     * @param array $criteria
      *
      * @return array The array of results.
      */
     public function find($criteria)
     {
-        $results = [];
+        return $this->onMatch($criteria);
+    }
 
-        foreach ($this->storage->find($criteria) as $data) {
-            $results[] = new Document($data);
-        }
+    protected function onMatch($criteria, $limit = null)
+    {
+        $expression = $this->parser->parse($criteria);
+        $matcher = $this->newMatcher($expression);
 
-        return $results;
+        $documents = $this->store->scanDocuments([$matcher, 'match'], $limit);
+
+        return $documents;
+    }
+
+    protected function newMatcher(ExpressionInterface $expression)
+    {
+        return new Matcher($expression);
     }
 }

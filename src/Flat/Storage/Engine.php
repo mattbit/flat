@@ -1,12 +1,13 @@
 <?php
 
-namespace Mattbit\Flat;
+namespace Mattbit\Flat\Storage;
 
+use Mattbit\Flat\Query\Parser;
 use Mattbit\Flat\Query\Matcher;
 use Mattbit\Flat\Document\Document;
 use League\Flysystem\FilesystemInterface;
 
-class Storage
+class Engine
 {
     /**
      * @var FilesystemInterface
@@ -17,41 +18,59 @@ class Storage
      * @var Encoder
      */
     protected $encoder;
-
-    protected $queryParser;
-
-    public function __construct(FilesystemInterface $filesystem, Encoder $encoder)
+    
+    public function __construct(FilesystemInterface $filesystem, JsonEncoder $encoder)
     {
         $this->filesystem = $filesystem;
         $this->encoder = $encoder;
     }
 
-    public function removeCollection($collection)
+    /**
+     * Get the Filesystem instance.
+     *
+     * @return FilesystemInterface
+     */
+    public function getFilesystem()
+    {
+        return $this->filesystem;
+    }
+
+
+    /**
+     * Get the EncoderInterface instance.
+     *
+     * @return EncoderInterface
+     */
+    public function getEncoder()
+    {
+        return $this->encoder;
+    }
+
+    /**
+     * Create a new DocumentStore.
+     *
+     * @param string $namespace
+     * @return DocumentStore
+     */
+    public function createDocumentStore($namespace)
+    {
+        return new DocumentStore($this, $namespace);
+    }
+
+    public function dropCollection($collection)
     {
         $this->filesystem->deleteDir($collection);
     }
 
-    public function createCollection($collection, $meta = [])
+    public function createCollection($collection)
     {
         $this->filesystem->createDir($collection);
     }
 
     public function truncateCollection($collection)
     {
-        $this->filesystem->deleteDir($collection);
+        $this->dropCollection($collection);
         $this->createCollection($collection);
-    }
-
-    public function insert($collection, array $document)
-    {
-        if (!isset($document['_id'])) {
-            $document['_id'] = sha1(uniqid('', true));
-        }
-
-        $data = $this->encoder->encode($document);
-        $destination = $this->path($collection, $document['_id']);
-
-        return $this->filesystem->write($destination, $data);
     }
 
     public function update($collection, array $criteria, array $updates, $multiple = false)
@@ -102,7 +121,8 @@ class Storage
     {
         $count = 0;
 
-        $matcher = new Matcher($criteria);
+        $expression = $this->parser->parse($criteria);
+        $matcher = new Matcher($expression);
 
         foreach ($this->filesystem->listContents($collection) as $meta) {
             $data = $this->filesystem->read($meta['path']);

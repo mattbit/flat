@@ -2,7 +2,7 @@
 
 namespace Mattbit\Flat\Document;
 
-class Document implements Matchable
+class Document implements Matchable, Identifiable, Encodable
 {
     protected $attributes;
 
@@ -19,6 +19,11 @@ class Document implements Matchable
     public function toArray()
     {
         return $this->attributes;
+    }
+
+    public function getId()
+    {
+        return $this->get('_id');
     }
 
     public function set($name, $value)

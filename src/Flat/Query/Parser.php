@@ -11,9 +11,9 @@ class Parser
 {
     protected $factory;
 
-    public function __construct()
+    public function __construct(Factory $factory)
     {
-        $this->factory = new Factory();
+        $this->factory = $factory;
     }
 
     /**

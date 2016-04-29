@@ -2,7 +2,10 @@
 
 namespace Mattbit\Flat\Query\Expression\Leaf;
 
-class Expression
+use Mattbit\Flat\Document\Matchable;
+use Mattbit\Flat\Query\Expression\ExpressionInterface;
+
+abstract class Expression implements ExpressionInterface
 {
     protected $key;
 
@@ -13,6 +16,8 @@ class Expression
         $this->key = $key;
         $this->reference = $reference;
     }
+
+    abstract public function match(Matchable $document);
 
     public function getKey()
     {
