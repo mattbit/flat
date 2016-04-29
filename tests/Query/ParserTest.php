@@ -155,6 +155,8 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     /** @expectedException \Exception */
     public function testThrowsExceptionWithInvalidTreeExpressionElement()
     {
+        $this->factory->shouldReceive('make')->andReturn(new AndExpression());
+
         $this->parser->parse([
             '$and' => 1
         ]);
