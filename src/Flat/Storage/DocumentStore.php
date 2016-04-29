@@ -23,6 +23,11 @@ class DocumentStore
     protected $namespace;
 
     /**
+     * @var \League\Flysystem\FilesystemInterface
+     */
+    protected $filesystem;
+
+    /**
      * Create a RecordStore instance.
      *
      * @param Engine $engine

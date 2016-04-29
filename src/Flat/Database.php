@@ -15,6 +15,9 @@ class Database
      */
     protected $engine;
 
+    /**
+     * @var Parser
+     */
     protected $parser;
 
     /**
@@ -54,14 +57,14 @@ class Database
 
     public function createCollection($name)
     {
-        $store = $this->engine->createDocumentStore($name);
+        $store = $this->engine->createCollection($name);
 
-        return $this->collections[$name] = new Collection($this, $store, $name);
+        return $this->collections[$name] = $this->newCollection($store, $name);
     }
 
     public function dropCollection($name)
     {
-        $this->engine->removeCollection($name);
+        $this->engine->dropCollection($name);
         unset($this->collections[$name]);
 
         return true;
@@ -76,5 +79,10 @@ class Database
     {
         $factory = new Factory();
         $this->parser = new Parser($factory);
+    }
+
+    protected function newCollection($store, $name)
+    {
+        return new Collection($this, $store, $name);
     }
 }

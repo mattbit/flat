@@ -2,11 +2,11 @@
 
 namespace Mattbit\Flat;
 
-use Mattbit\Flat\Document\Document;
-use Mattbit\Flat\Document\Identifiable;
-use Mattbit\Flat\Query\Expression\ExpressionInterface;
 use Mattbit\Flat\Query\Matcher;
+use Mattbit\Flat\Document\Identifiable;
+use Mattbit\Flat\Query\Parser;
 use Mattbit\Flat\Storage\DocumentStore;
+use Mattbit\Flat\Query\Expression\ExpressionInterface;
 
 class Collection
 {
@@ -24,6 +24,11 @@ class Collection
      * @var Database
      */
     protected $database;
+
+    /**
+     * @var Parser
+     */
+    protected $parser;
 
     /**
      * Construct a new collection.
