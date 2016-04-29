@@ -4,6 +4,7 @@ namespace Mattbit\Flat;
 
 use Mattbit\Flat\Query\Expression\Factory;
 use Mattbit\Flat\Query\Parser;
+use Mattbit\Flat\Storage\DocumentStore;
 use Mattbit\Flat\Storage\Engine;
 
 class Database
@@ -81,7 +82,7 @@ class Database
         $this->parser = new Parser($factory);
     }
 
-    protected function newCollection($store, $name)
+    protected function newCollection(DocumentStore $store, $name)
     {
         return new Collection($this, $store, $name);
     }

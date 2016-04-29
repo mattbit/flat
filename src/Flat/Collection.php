@@ -52,7 +52,7 @@ class Collection
      */
     public function drop()
     {
-        return $this->database->dropCollection($this);
+        return $this->database->dropCollection($this->name);
     }
 
     /**
