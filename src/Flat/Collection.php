@@ -92,7 +92,7 @@ class Collection
         $documents = $this->onMatch($criteria, $limit);
 
         foreach ($documents as $document) {
-            $this->store->updateDocument($updated, $multiple);
+            $this->store->updateDocument($updated);
         }
     }
 

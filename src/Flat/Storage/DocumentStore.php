@@ -41,6 +41,11 @@ class DocumentStore
         $this->encoder = $this->engine->getEncoder();
     }
 
+    public function getNamespace()
+    {
+        return $this->namespace;
+    }
+
     public function truncate()
     {
         $files = $this->filesystem->listContents($this->namespace);
@@ -56,27 +61,15 @@ class DocumentStore
     {
         $id = $document->getId() ?: $this->generateId();
         $path = $this->path($id);
-        $data = $this->encoder->encode($document);
 
         if ($this->filesystem->has($this->path($id))) {
             throw new \Exception("Duplicate _id: {$id}");
         }
 
-
+        $data = $this->encoder->encode($document);
         $this->filesystem->put($path, $data);
 
         return $id;
-    }
-
-    public function insertDocuments(array $documents)
-    {
-        $ids = [];
-
-        foreach ($documents as $document) {
-            $ids[] = $this->insertDocument($document);
-        }
-
-        return $ids;
     }
 
     public function updateDocument(Identifiable $document)
@@ -98,15 +91,6 @@ class DocumentStore
         return $this->filesystem->delete($path);
     }
 
-    public function removeDocuments(array $documentIds)
-    {
-        foreach ($documentIds as $documentId) {
-            $this->removeDocument($documentId);
-        }
-
-        return true;
-    }
-
     public function findDocument($documentId)
     {
         $path = $this->path($documentId);
@@ -121,7 +105,7 @@ class DocumentStore
         $documents = [];
 
         foreach ($files as $index => $file) {
-            if ($limit && $index > $limit) {
+            if ($limit && $index >= $limit) {
                 break;
             }
 
@@ -141,21 +125,9 @@ class DocumentStore
         return sprintf('%s/%s.%s', $this->namespace, $id, $this->encoder->getExtension());
     }
 
-    protected function extractId($record)
-    {
-        if (isset($record['_id'])) {
-            return $record['_id'];
-        }
-    }
-
     protected function generateId()
     {
         // A simple uniqid should have enough entropy.
         return uniqid();
-    }
-
-    protected function newDocument($attributes)
-    {
-        return new Document($attributes);
     }
 }

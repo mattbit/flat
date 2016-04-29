@@ -19,7 +19,7 @@ class Engine
      */
     protected $encoder;
 
-    public function __construct(FilesystemInterface $filesystem, JsonEncoder $encoder)
+    public function __construct(FilesystemInterface $filesystem, EncoderInterface $encoder)
     {
         $this->filesystem = $filesystem;
         $this->encoder = $encoder;

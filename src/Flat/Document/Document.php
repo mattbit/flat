@@ -47,7 +47,7 @@ class Document implements Matchable, Identifiable, Encodable
         $attributes = $this->attributes;
 
         foreach (explode('.', $name) as $key) {
-            if (array_key_exists($key, $attributes) && is_array($attributes[$key])) {
+            if (is_array($attributes) && array_key_exists($key, $attributes)) {
                 $attributes = $attributes[$key];
             } else {
                 return;
@@ -73,7 +73,7 @@ class Document implements Matchable, Identifiable, Encodable
         $attributes = $this->attributes;
 
         foreach (explode('.', $name) as $key) {
-            if (array_key_exists($key, $attributes) && is_array($attributes[$key])) {
+            if (is_array($attributes) && array_key_exists($key, $attributes)) {
                 $attributes = $attributes[$key];
             } else {
                 return false;
@@ -81,35 +81,5 @@ class Document implements Matchable, Identifiable, Encodable
         }
 
         return true;
-    }
-
-    public function __set($name, $value)
-    {
-        return $this->set($name, $value);
-    }
-
-    public function __get($name)
-    {
-        return $this->get($name);
-    }
-
-    public function offsetExists($offset)
-    {
-        return array_key_exists($offset, $this->attributes);
-    }
-
-    public function offsetGet($offset)
-    {
-        return $this->attributes[$offset];
-    }
-
-    public function offsetSet($offset, $value)
-    {
-        $this->attributes[$offset] = $value;
-    }
-
-    public function offsetUnset($offset)
-    {
-        unset($this->attributes[$offset]);
     }
 }
