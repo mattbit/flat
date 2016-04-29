@@ -1,12 +1,13 @@
 <?php
 
-use Mattbit\Flat\Query\Expression\Leaf\InExpression;
+use Mockery as m;
 use Mattbit\Flat\Query\Parser;
 use Mattbit\Flat\Query\Expression\Type;
+use Mattbit\Flat\Query\Expression\Leaf\InExpression;
 use Mattbit\Flat\Query\Expression\Leaf\EqExpression;
 use Mattbit\Flat\Query\Expression\Leaf\GtExpression;
-use Mattbit\Flat\Query\Expression\Tree\AndExpression;
 use Mattbit\Flat\Query\Expression\Tree\OrExpression;
+use Mattbit\Flat\Query\Expression\Tree\AndExpression;
 
 class ParserTest extends \PHPUnit_Framework_TestCase
 {
@@ -15,10 +16,20 @@ class ParserTest extends \PHPUnit_Framework_TestCase
      */
     protected $parser;
 
+    /**
+     * The Expression\Factory mock.
+     */
+    protected $factory;
+
     public function setUp()
     {
-        // @todo: mock the factory
-        $this->parser = new Parser(new \Mattbit\Flat\Query\Expression\Factory());
+        $this->factory = m::mock(\Mattbit\Flat\Query\Expression\Factory::class);
+        $this->parser = new Parser($this->factory);
+    }
+
+    public function tearDown()
+    {
+        m::close();
     }
 
     public function testParseEqualityExpression()
@@ -34,17 +45,24 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 
     public function testParseLeafExpression()
     {
-        $expression = $this->parser->parse([
+        $this->factory->shouldReceive('make')
+            ->with(Type::EQ, 'field', 2);
+
+        $this->parser->parse([
             'field' => ['$eq' => 2]
         ]);
-
-        $this->assertInstanceOf(EqExpression::class, $expression);
-        $this->assertEquals('field', $expression->getKey());
-        $this->assertEquals(2, $expression->getReference());
     }
 
     public function testWrapMultipleExpressionsWithAnd()
     {
+        $this->factory->shouldReceive('make')
+            ->with(Type::EQ, 'field_one', 1)
+            ->andReturn(new StubExpression());
+
+        $this->factory->shouldReceive('make')
+            ->with(Type::GT, 'field_two', 2)
+            ->andReturn(new StubExpression());
+
         $expression = $this->parser->parse([
             'field_one' => ['$eq' => 1],
             'field_two' => ['$gt' => 2],
@@ -54,21 +72,18 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 
         $children = $expression->getExpressions();
         $this->assertCount(2, $children);
-        $this->assertInstanceOf(EqExpression::class, $children[0]);
-        $this->assertEquals('field_one', $children[0]->getKey());
-        $this->assertEquals(1, $children[0]->getReference());
     }
 
     public function testParseNestedFields()
     {
-        $expression = $this->parser->parse([
+        $this->factory->shouldReceive('make')
+            ->with(Type::EQ, 'user.age', 18);
+
+        $this->parser->parse([
             'user' => [
                 'age' => ['$eq' => 18]
             ]
         ]);
-
-        $this->assertInstanceOf(EqExpression::class, $expression);
-        $this->assertEquals('user.age', $expression->getKey());
     }
 
     public function testWrapNestedExpressionsWithAnd()
@@ -83,8 +98,20 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf(AndExpression::class, $expression);
     }
 
-    public function testParseTreeExpressions()
+    public function testParseOrExpressions()
     {
+        $this->factory->shouldReceive('make')
+            ->with(Type::OR_MATCH, m::any(), m::any())
+            ->andReturn(new OrExpression());
+
+        $this->factory->shouldReceive('make')
+            ->with(Type::EQ, 'name', 'John')
+            ->andReturn(new StubExpression());
+
+        $this->factory->shouldReceive('make')
+            ->with(Type::EQ, 'name', 'Joe')
+            ->andReturn(new StubExpression());
+
         $expression = $this->parser->parse([
             'name' => [
                 '$or' => [
@@ -95,40 +122,34 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         ]);
 
         $this->assertInstanceOf(OrExpression::class, $expression);
+        $this->assertCount(2, $expression->getExpressions());
+    }
 
-        $children = $expression->getExpressions();
+    public function testParseAndExpression()
+    {
+        $this->factory->shouldReceive('make')
+            ->with(Type::AND_MATCH, m::any(), m::any())
+            ->andReturn(new AndExpression());
 
-        $this->assertCount(2, $children);
-        $this->assertInstanceOf(EqExpression::class, $children[0]);
+        $this->factory->shouldReceive('make')
+            ->with(Type::EQ, 'user.name', 'John')
+            ->andReturn(new StubExpression());
+
+        $this->factory->shouldReceive('make')
+            ->with(Type::GT, 'user.age', 18)
+            ->andReturn(new StubExpression());
 
         $expression = $this->parser->parse([
             'user' => [
                 '$and' => [
-                    'name' => [ '$eq' => 'John' ],
-                    'age' => [ '$gt' => 18]
+                    ['name' => [ '$eq' => 'John' ]],
+                    ['age' => [ '$gt' => 18]]
                 ]
             ]
         ]);
 
         $this->assertInstanceOf(AndExpression::class, $expression);
-
-        $children = $expression->getExpressions();
-
-        $this->assertCount(2, $children);
-        $this->assertInstanceOf(EqExpression::class, $children[0]);
-    }
-
-    public function testParseArrayExpression()
-    {
-        $expression = $this->parser->parse([
-            'name' => [
-                '$in' => ['John', 'Joe']
-            ]
-        ]);
-
-        $this->assertInstanceOf(InExpression::class, $expression);
-        $this->assertEquals(['John', 'Joe'], $expression->getReference());
-        $this->assertEquals('name', $expression->getKey());
+        $this->assertCount(2, $expression->getExpressions());
     }
 
     /** @expectedException \Exception */
@@ -138,5 +159,10 @@ class ParserTest extends \PHPUnit_Framework_TestCase
             '$and' => 1
         ]);
     }
+}
 
+class StubExpression implements \Mattbit\Flat\Query\Expression\ExpressionInterface {
+    public function match(\Mattbit\Flat\Document\Matchable $document) {
+        return true;
+    }
 }
