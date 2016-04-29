@@ -17,7 +17,8 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->parser = new Parser();
+        // @todo: mock the factory
+        $this->parser = new Parser(new \Mattbit\Flat\Query\Expression\Factory());
     }
 
     public function testParseEqualityExpression()
