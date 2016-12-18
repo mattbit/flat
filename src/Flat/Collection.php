@@ -7,9 +7,8 @@ use Mattbit\Flat\Query\Matcher;
 use Mattbit\Flat\Storage\DocumentStore;
 use Mattbit\Flat\Model\DocumentInterface;
 use Mattbit\Flat\Query\Expression\ExpressionInterface;
-use Traversable;
 
-class Collection implements \IteratorAggregate
+class Collection
 {
     /**
      * @var string
@@ -143,10 +142,5 @@ class Collection implements \IteratorAggregate
     protected function newMatcher(ExpressionInterface $expression)
     {
         return new Matcher($expression);
-    }
-
-    public function getIterator()
-    {
-        return $this->store->getIterator();
     }
 }

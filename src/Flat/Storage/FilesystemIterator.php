@@ -13,7 +13,7 @@ class FilesystemIterator implements \Iterator {
     protected $encoder;
 
     /**
-     * @var Iterator
+     * @var \Iterator
      */
     protected $iterator;
 
