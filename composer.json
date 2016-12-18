@@ -6,7 +6,9 @@
     "require-dev": {
         "symfony/var-dumper": "^3.0",
         "phpunit/phpunit": "^5.3",
-        "mockery/mockery": "^0.9.4"
+        "mockery/mockery": "^0.9.4",
+        "phpunit/php-code-coverage": "^4.0",
+        "mikey179/vfsStream": "~1"
     },
     "authors": [
         {
@@ -20,6 +22,5 @@
         }
     },
     "require": {
-        "league/flysystem": "^1.0"
     }
 }

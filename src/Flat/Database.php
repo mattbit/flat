@@ -2,17 +2,17 @@
 
 namespace Mattbit\Flat;
 
-use Mattbit\Flat\Query\Expression\Factory;
 use Mattbit\Flat\Query\Parser;
 use Mattbit\Flat\Storage\DocumentStore;
-use Mattbit\Flat\Storage\Engine;
+use Mattbit\Flat\Storage\EngineInterface;
+use Mattbit\Flat\Query\Expression\Factory;
 
 class Database
 {
     /**
      * The storage engine.
      *
-     * @var Engine
+     * @var FilesystemEngine
      */
     protected $engine;
 
@@ -28,10 +28,9 @@ class Database
      */
     protected $collections;
 
-    public function __construct(Engine $engine)
+    public function __construct(EngineInterface $engine)
     {
         $this->engine = $engine;
-
         $this->initializeParser();
     }
 
@@ -58,14 +57,15 @@ class Database
 
     public function createCollection($name)
     {
-        $store = $this->engine->createCollection($name);
+        $this->engine->init($name);
+        $store = new DocumentStore($this->engine, $name);
 
         return $this->collections[$name] = $this->newCollection($store, $name);
     }
 
     public function dropCollection($name)
     {
-        $this->engine->dropCollection($name);
+        $this->engine->destroy($name);
         unset($this->collections[$name]);
 
         return true;
@@ -75,7 +75,7 @@ class Database
     {
         return $this->parser;
     }
-    
+
     protected function initializeParser()
     {
         $factory = new Factory();

@@ -1,6 +1,6 @@
 <?php
 
-use Mattbit\Flat\Document\Document;
+use Mattbit\Flat\Model\Document;
 
 class DocumentTest extends PHPUnit_Framework_TestCase
 {
@@ -13,8 +13,7 @@ class DocumentTest extends PHPUnit_Framework_TestCase
 
     public function testAttributes()
     {
-        $document = new Document();
-        $document->set('test', 'ok');
+        $document = new Document(['test' => 'ok']);
 
         $this->assertEquals('ok', $document->get('test'));
         $this->assertNull($document->get('unknown'));
@@ -34,8 +33,15 @@ class DocumentTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals('John', $document->get('user.name'));
         $this->assertEquals('john@example.com', $document->get('user.email'));
-        
+
         $this->assertTrue($document->has('user.name'));
         $this->assertFalse($document->has('user.nothing'));
+
+        $document->set('new.nested.field', 'hello');
+        $document->set('user.likes.beer', true);
+
+        $this->assertEquals('hello', $document->get('new.nested.field'));
+        $this->assertTrue($document->get('user.likes.beer'));
+        $this->assertEquals('John', $document->get('user.name'));
     }
 }

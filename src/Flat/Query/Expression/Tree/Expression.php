@@ -2,14 +2,14 @@
 
 namespace Mattbit\Flat\Query\Expression\Tree;
 
-use Mattbit\Flat\Document\Matchable;
+use Mattbit\Flat\Model\DocumentInterface;
 use Mattbit\Flat\Query\Expression\ExpressionInterface;
 
 abstract class Expression implements ExpressionInterface
 {
     protected $expressions = [];
 
-    abstract public function match(Matchable $document);
+    abstract public function match(DocumentInterface $document);
 
     public function __construct($expressions = [])
     {

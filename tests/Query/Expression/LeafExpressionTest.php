@@ -76,7 +76,7 @@ class LeafExpressionTest extends PHPUnit_Framework_TestCase
 
     protected function docWithValue($value)
     {
-        return new Mattbit\Flat\Document\Document([
+        return new Mattbit\Flat\Model\Document([
             'value' => $value
         ]);
     }

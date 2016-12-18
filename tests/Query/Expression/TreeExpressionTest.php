@@ -1,7 +1,7 @@
 <?php
 
-use Mattbit\Flat\Document\Document;
-use Mattbit\Flat\Document\Matchable;
+use Mattbit\Flat\Model\Document;
+use Mattbit\Flat\Model\DocumentInterface;
 use Mattbit\Flat\Query\Expression\ExpressionInterface;
 use Mattbit\Flat\Query\Expression\Tree\AndExpression;
 use Mattbit\Flat\Query\Expression\Tree\OrExpression;
@@ -47,7 +47,7 @@ class TreeExpressionTest extends PHPUnit_Framework_TestCase
 
 class TrueExpression implements ExpressionInterface
 {
-    public function match(Matchable $document)
+    public function match(DocumentInterface $document)
     {
         return true;
     }
@@ -55,7 +55,7 @@ class TrueExpression implements ExpressionInterface
 
 class FalseExpression implements ExpressionInterface
 {
-    public function match(Matchable $document)
+    public function match(DocumentInterface $document)
     {
         return false;
     }

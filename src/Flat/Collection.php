@@ -2,13 +2,14 @@
 
 namespace Mattbit\Flat;
 
-use Mattbit\Flat\Query\Matcher;
-use Mattbit\Flat\Document\Identifiable;
 use Mattbit\Flat\Query\Parser;
+use Mattbit\Flat\Query\Matcher;
 use Mattbit\Flat\Storage\DocumentStore;
+use Mattbit\Flat\Model\DocumentInterface;
 use Mattbit\Flat\Query\Expression\ExpressionInterface;
+use Traversable;
 
-class Collection
+class Collection implements \IteratorAggregate
 {
     /**
      * @var string
@@ -68,31 +69,31 @@ class Collection
     /**
      * Insert a new document.
      *
-     * @param Identifiable $document
+     * @param DocumentInterface $document
      *
      * @return bool
      */
-    public function insert(Identifiable $document)
+    public function insert(DocumentInterface $document)
     {
-        return $this->store->insertDocument($document);
+        return $this->store->insert($document);
     }
 
     /**
      * Update existing documents.
      *
      * @param array        $criteria
-     * @param Identifiable $updated
+     * @param DocumentInterface $updated
      * @param bool         $multiple
      *
      * @return int The count of the documents updated.
      */
-    public function update($criteria, Identifiable $updated, $multiple = false)
+    public function update($criteria, DocumentInterface $updated, $multiple = false)
     {
         $limit = $multiple ? 1 : null;
         $documents = $this->onMatch($criteria, $limit);
 
         foreach ($documents as $document) {
-            $this->store->updateDocument($updated);
+            $this->store->update($updated);
         }
     }
 
@@ -109,9 +110,9 @@ class Collection
         $limit = $multiple ? 1 : null;
 
         $documents = $this->onMatch($criteria, $limit);
-        
+
         foreach ($documents as $document) {
-            $this->store->removeDocument($document->getId());
+            $this->store->remove($document->get('_id'));
         }
 
         return true;
@@ -134,7 +135,7 @@ class Collection
         $expression = $this->parser->parse($criteria);
         $matcher = $this->newMatcher($expression);
 
-        $documents = $this->store->scanDocuments([$matcher, 'match'], $limit);
+        $documents = $this->store->scan([$matcher, 'match'], $limit);
 
         return $documents;
     }
@@ -142,5 +143,10 @@ class Collection
     protected function newMatcher(ExpressionInterface $expression)
     {
         return new Matcher($expression);
+    }
+
+    public function getIterator()
+    {
+        return $this->store->getIterator();
     }
 }

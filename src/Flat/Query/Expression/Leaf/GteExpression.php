@@ -2,12 +2,12 @@
 
 namespace Mattbit\Flat\Query\Expression\Leaf;
 
-use Mattbit\Flat\Document\Matchable;
+use Mattbit\Flat\Model\DocumentInterface;
 
 class GteExpression extends Expression
 {
-    public function match(Matchable $document)
+    public function match(DocumentInterface $document)
     {
-        return $document->get($this->key) >= $this->reference;
+        return $this->getValue($document) >= $this->reference;
     }
 }

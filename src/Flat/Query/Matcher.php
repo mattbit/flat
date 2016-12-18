@@ -2,7 +2,7 @@
 
 namespace Mattbit\Flat\Query;
 
-use Mattbit\Flat\Document\Matchable;
+use Mattbit\Flat\Model\DocumentInterface;
 use Mattbit\Flat\Query\Expression\ExpressionInterface;
 
 class Matcher
@@ -19,16 +19,17 @@ class Matcher
      */
     public function __construct(ExpressionInterface $expression)
     {
+        // @todo: the expression should be parsed here
         $this->expression = $expression;
     }
 
     /**
      * Check if a document matches the expression.
      *
-     * @param Matchable $document
+     * @param DocumentInterface $document
      * @return mixed
      */
-    public function match(Matchable $document)
+    public function match(DocumentInterface $document)
     {
         return $this->expression->match($document);
     }

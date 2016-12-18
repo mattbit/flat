@@ -2,9 +2,9 @@
 
 namespace Mattbit\Flat\Query\Expression;
 
-use Mattbit\Flat\Document\Matchable;
+use Mattbit\Flat\Model\DocumentInterface;
 
 interface ExpressionInterface
 {
-    public function match(Matchable $document);
+    public function match(DocumentInterface $document);
 }

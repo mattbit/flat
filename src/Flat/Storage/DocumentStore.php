@@ -2,20 +2,19 @@
 
 namespace Mattbit\Flat\Storage;
 
-use Mattbit\Flat\Document\Document;
-use Mattbit\Flat\Document\Identifiable;
+use Mattbit\Flat\Model\DocumentInterface;
+use Mattbit\Flat\Storage\Filesystem\FilesystemCursor;
 
-class DocumentStore
+use Mattbit\Flat\Storage\EncoderInterface;
+
+use Mattbit\Flat\Exception\DuplicateKeyException;
+
+class DocumentStore implements \IteratorAggregate
 {
     /**
-     * @var Engine
+     * @var EngineInterface
      */
     protected $engine;
-
-    /**
-     * @var EncoderInterface
-     */
-    protected $encoder;
 
     /**
      * @var string
@@ -23,22 +22,15 @@ class DocumentStore
     protected $namespace;
 
     /**
-     * @var \League\Flysystem\FilesystemInterface
-     */
-    protected $filesystem;
-
-    /**
-     * Create a RecordStore instance.
+     * Create a DocumentStore instance.
      *
-     * @param Engine $engine
+     * @param EngineInterface $engine
      * @param string $namespace
      */
-    public function __construct(Engine $engine, $namespace)
+    public function __construct(EngineInterface $engine, $namespace)
     {
         $this->engine = $engine;
         $this->namespace = $namespace;
-        $this->filesystem = $this->engine->getFilesystem();
-        $this->encoder = $this->engine->getEncoder();
     }
 
     public function getNamespace()
@@ -46,71 +38,61 @@ class DocumentStore
         return $this->namespace;
     }
 
-    public function truncate()
+    public function getEngine()
     {
-        $files = $this->filesystem->listContents($this->namespace);
-
-        foreach ($files as $file) {
-            $this->filesystem->delete($file['path']);
-        }
-
-        return true;
+        return $this->engine;
     }
 
-    public function insertDocument(Identifiable $document)
+    public function truncate()
     {
-        $id = $document->getId() ?: $this->generateId();
-        $path = $this->path($id);
+        return $this->engine->clear($this->namespace);
+    }
 
-        if ($this->filesystem->has($this->path($id))) {
-            throw new \Exception("Duplicate _id: {$id}");
+    public function insert(DocumentInterface $document)
+    {
+        if (!$id = $document->getId()) {
+            $id = $this->generateId();
+            $document->setId($id);
         }
 
-        $data = $this->encoder->encode($document);
-        $this->filesystem->put($path, $data);
+        if ($this->engine->has($id, $this->namespace)) {
+            throw new DuplicateKeyException("Cannot insert document with duplicate key: {$id}");
+        }
+
+        $this->engine->put($document, $id, $this->namespace);
 
         return $id;
     }
 
-    public function updateDocument(Identifiable $document)
+    public function update(DocumentInterface $document)
     {
         if (!$id = $document->getId()) {
             throw new \Exception("Cannot update a document without _id!");
         }
 
-        $data = $this->encoder->encode($document);
-        $path = $this->path($id);
-
-        return $this->filesystem->put($path, $data);
+        return $this->engine->put($document, $id, $this->namespace);
     }
 
-    public function removeDocument($documentId)
+    public function remove($id)
     {
-        $path = $this->path($documentId);
-
-        return $this->filesystem->delete($path);
+        return $this->engine->delete($id, $this->namespace);
     }
 
-    public function findDocument($documentId)
+    public function find($id)
     {
-        $path = $this->path($documentId);
-        $data = $this->filesystem->read($path);
-
-        return $this->encoder->decode($data);
+        return $this->engine->get($id, $this->namespace);
     }
 
-    public function scanDocuments(callable $filter = null, $limit = null)
+    public function scan(callable $filter = null, $limit = null)
     {
-        $files = $this->filesystem->listContents($this->namespace);
         $documents = [];
 
-        foreach ($files as $index => $file) {
+        $index = 0;
+        foreach ($this->engine->all($this->namespace) as $document) {
             if ($limit && $index >= $limit) {
                 break;
             }
-
-            $data = $this->filesystem->read($file['path']);
-            $document = $this->encoder->decode($data);
+            $index += 1;
 
             if (!$filter || call_user_func($filter, $document)) {
                 $documents[] = $document;
@@ -120,14 +102,20 @@ class DocumentStore
         return $documents;
     }
 
-    protected function path($id)
-    {
-        return sprintf('%s/%s.%s', $this->namespace, $id, $this->encoder->getExtension());
-    }
+    public function insertDocument($namespace) {}
+    public function removeDocument($id) {}
+    public function createCollection($collection) {}
+    public function dropCollection($collection) {}
 
     protected function generateId()
     {
         // A simple uniqid should have enough entropy.
+        // @todo: evaluate the usage of ramsey/uuid
         return uniqid();
+    }
+
+    public function getIterator()
+    {
+        return $this->engine->createCursor($this);
     }
 }

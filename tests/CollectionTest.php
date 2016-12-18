@@ -4,7 +4,7 @@ use Mockery as m;
 use Mattbit\Flat\Database;
 use Mattbit\Flat\Collection;
 use Mattbit\Flat\Query\Parser;
-use Mattbit\Flat\Document\Document;
+use Mattbit\Flat\Model\Document;
 use Mattbit\Flat\Storage\DocumentStore;
 use Mattbit\Flat\Query\Expression\ExpressionInterface;
 
@@ -52,7 +52,7 @@ class CollectionTest extends PHPUnit_Framework_TestCase
     {
         $document = new Document();
 
-        $this->store->shouldReceive('insertDocument')
+        $this->store->shouldReceive('insert')
             ->once()
             ->with($document);
 
@@ -69,13 +69,13 @@ class CollectionTest extends PHPUnit_Framework_TestCase
         $doc1 = new Document(['_id' => 1]);
         $doc2 = new Document(['_id' => 2]);
 
-        $this->store->shouldReceive('scanDocuments')
+        $this->store->shouldReceive('scan')
             ->andReturn([$doc1, $doc2]);
 
-        $this->store->shouldReceive('removeDocument')
+        $this->store->shouldReceive('remove')
             ->once()
             ->with(1);
-        $this->store->shouldReceive('removeDocument')
+        $this->store->shouldReceive('remove')
             ->once()
             ->with(2);
 
@@ -92,7 +92,7 @@ class CollectionTest extends PHPUnit_Framework_TestCase
         $doc1 = new Document(['_id' => 1]);
         $doc2 = new Document(['_id' => 2]);
 
-        $this->store->shouldReceive('scanDocuments')
+        $this->store->shouldReceive('scan')
             ->andReturn([$doc1, $doc2]);
 
         $this->assertEquals([$doc1, $doc2], $this->collection->find(['field' => 'test']));

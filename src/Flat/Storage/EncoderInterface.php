@@ -2,11 +2,10 @@
 
 namespace Mattbit\Flat\Storage;
 
-use Mattbit\Flat\Document\Encodable;
+use Mattbit\Flat\Model\DocumentInterface;
 
 interface EncoderInterface
 {
-    public function encode(Encodable $document);
+    public function encode(DocumentInterface $document);
     public function decode($data);
-    public function getExtension();
 }

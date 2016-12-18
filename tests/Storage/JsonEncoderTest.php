@@ -1,6 +1,7 @@
 <?php
 
-use Mattbit\Flat\Document\Document;
+use Mattbit\Flat\Model\Date;
+use Mattbit\Flat\Model\Document;
 use Mattbit\Flat\Storage\JsonEncoder;
 
 class JsonEncoderTest extends PHPUnit_Framework_TestCase
@@ -14,21 +15,34 @@ class JsonEncoderTest extends PHPUnit_Framework_TestCase
 
     public function testEncode()
     {
-        $document = new Document(['test' => true]);
+        $document = new Document(['test' => true, 'nested' => ['attribute' => 4]]);
+        $encoded = $this->encoder->encode($document);
+        $data = json_decode($encoded, true);
 
-        $this->assertEquals('{"test":true}', $this->encoder->encode($document));
+        $this->assertArrayHasKey('_doc', $data);
+        $this->assertEquals(['test' => true, 'nested' => ['attribute' => 4]], $data['_doc']);
     }
 
     public function testDecode()
     {
         $document = new Document(['test' => true]);
 
-        $this->assertEquals($document, $this->encoder->decode('{"test":true}'));
-
+        $this->assertEquals($document, $this->encoder->decode('{"_doc":{"test":true}}'));
     }
 
-    public function testExtension()
+    public function testDatePreservation()
     {
-        $this->assertEquals('json', $this->encoder->getExtension());
+        $original = new Document(['test' => true, 'my_date' => new Date()]);
+
+        $data = $this->encoder->encode($original);
+        $document = $this->encoder->decode($data);
+
+        $this->assertEquals($original->get('my_date'), $document->get('my_date'));
+    }
+
+    /** @expectedException \Mattbit\Flat\Exception\DecodeException */
+    public function testDecodeFailure()
+    {
+        $this->encoder->decode('{"test":false}');
     }
 }

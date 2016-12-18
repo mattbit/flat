@@ -164,7 +164,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 }
 
 class StubExpression implements \Mattbit\Flat\Query\Expression\ExpressionInterface {
-    public function match(\Mattbit\Flat\Document\Matchable $document) {
+    public function match(\Mattbit\Flat\Model\DocumentInterface $document) {
         return true;
     }
 }

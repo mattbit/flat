@@ -2,12 +2,10 @@
 
 namespace Mattbit;
 
+use League\Flysystem\Plugin\ListPaths;
 use Mattbit\Flat\Database;
-use Mattbit\Flat\Query\Parser;
 use Mattbit\Flat\Storage\JsonEncoder;
-use Mattbit\Flat\Storage\Engine;
-use League\Flysystem\Filesystem;
-use League\Flysystem\Adapter\Local;
+use Mattbit\Flat\Storage\FilesystemEngine;
 
 class Flat
 {
@@ -20,10 +18,8 @@ class Flat
      */
     public static function localDatabase($path)
     {
-        $adapter = new Local($path);
-        $filesystem = new Filesystem($adapter);
         $encoder = new JsonEncoder();
-        $engine = new Engine($filesystem, $encoder);
+        $engine = new FilesystemEngine($path, $encoder);
 
         return new Database($engine);
     }

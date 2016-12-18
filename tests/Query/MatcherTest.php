@@ -1,6 +1,6 @@
 <?php
 
-use Mattbit\Flat\Document\Document;
+use Mattbit\Flat\Model\Document;
 use Mattbit\Flat\Query\Expression\ExpressionInterface;
 use Mattbit\Flat\Query\Matcher;
 use Mockery as m;
