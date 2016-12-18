@@ -12,6 +12,11 @@ class FilesystemIterator implements \Iterator {
      */
     protected $encoder;
 
+    /**
+     * @var Iterator
+     */
+    protected $iterator;
+
     public function __construct(EncoderInterface $encoder, $path)
     {
         $this->encoder = $encoder;

@@ -12,7 +12,7 @@ class Database
     /**
      * The storage engine.
      *
-     * @var FilesystemEngine
+     * @var EngineInterface
      */
     protected $engine;
 

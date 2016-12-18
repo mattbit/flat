@@ -3,13 +3,11 @@
 namespace Mattbit\Flat\Storage;
 
 use Mattbit\Flat\Model\DocumentInterface;
+use Mattbit\Flat\Storage\EncoderInterface;
+use Mattbit\Flat\Exception\DuplicateKeyException;
 use Mattbit\Flat\Storage\Filesystem\FilesystemCursor;
 
-use Mattbit\Flat\Storage\EncoderInterface;
-
-use Mattbit\Flat\Exception\DuplicateKeyException;
-
-class DocumentStore implements \IteratorAggregate
+class DocumentStore
 {
     /**
      * @var EngineInterface
@@ -102,20 +100,10 @@ class DocumentStore implements \IteratorAggregate
         return $documents;
     }
 
-    public function insertDocument($namespace) {}
-    public function removeDocument($id) {}
-    public function createCollection($collection) {}
-    public function dropCollection($collection) {}
-
     protected function generateId()
     {
         // A simple uniqid should have enough entropy.
         // @todo: evaluate the usage of ramsey/uuid
         return uniqid();
-    }
-
-    public function getIterator()
-    {
-        return $this->engine->createCursor($this);
     }
 }
