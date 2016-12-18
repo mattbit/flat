@@ -67,7 +67,7 @@ class Document extends \ArrayObject implements DocumentInterface
             // If the key doesn't exist at this depth, we will just create an empty array
             // to hold the next value, allowing us to create the arrays to hold final
             // values at the correct depth. Then we'll keep digging into the array.
-            if (! isset($attributes[$key]) || ! is_array($attributes[$key])) {
+            if (!isset($attributes[$key]) || !is_array($attributes[$key])) {
                 $attributes[$key] = [];
             }
             $attributes = &$attributes[$key];

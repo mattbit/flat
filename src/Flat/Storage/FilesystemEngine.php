@@ -84,6 +84,6 @@ class FilesystemEngine implements EngineInterface
 
     protected function path($id, $collection, $ext = '.data')
     {
-        return $this->namespace . DIRECTORY_SEPARATOR . $collection . DIRECTORY_SEPARATOR . $id . $ext;
+        return $this->namespace.DIRECTORY_SEPARATOR.$collection.DIRECTORY_SEPARATOR.$id.$ext;
     }
 }

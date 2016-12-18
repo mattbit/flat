@@ -11,8 +11,6 @@ class JsonEncoder implements EncoderInterface
 {
     public function encode(DocumentInterface $document)
     {
-        $meta = [];
-
         $flattened = $this->flatten($document);
         $dates = $this->filterDateAttributes($flattened);
 
@@ -33,7 +31,7 @@ class JsonEncoder implements EncoderInterface
     {
         $data = json_decode($data, true);
 
-        if (!isset($data['_doc']) ){
+        if (!isset($data['_doc'])) {
             throw new DecodeException("Document decoding failed because of bad/corrupted data.");
         }
 
@@ -53,7 +51,7 @@ class JsonEncoder implements EncoderInterface
         $results = [];
 
         foreach ($document as $key => $value) {
-            if (is_array($value) && ! empty($value)) {
+            if (is_array($value) && !empty($value)) {
                 $results = array_merge($results, $this->flatten($value, $prepend.$key.'.'));
             } else {
                 $results[$prepend.$key] = $value;
