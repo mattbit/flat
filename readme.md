@@ -10,6 +10,8 @@ Flat is a flat-file database with a mongo-like API, written in PHP.
 
 ### Inserting documents
 ```php
+$db = Flat::localDatabase("/path/to/db");
+
 $doc = new Document([
     'title' => 'Flat',
     'description' => 'A flat NoSQL database',
