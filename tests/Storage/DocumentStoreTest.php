@@ -133,7 +133,7 @@ class DocumentStoreTest extends PHPUnit_Framework_TestCase
     {
         $this->engine->shouldReceive('all')
             ->once()
-            ->andReturn(['doc_1', 'doc_2', 'doc_3']);
+            ->andReturn(new ArrayIterator(['doc_1', 'doc_2', 'doc_3']));
 
         $this->assertEquals(['doc_1', 'doc_2', 'doc_3'], $this->store->scan());
     }
@@ -153,12 +153,28 @@ class DocumentStoreTest extends PHPUnit_Framework_TestCase
     {
         $this->engine->shouldReceive('all')
             ->once()
-            ->andReturn(['doc_1', 'doc_2', 'doc_3']);
+            ->andReturn(new ArrayIterator(['doc_1', 'doc_2', 'doc_3']));
 
         $documents = $this->store->scan(function($doc) {
             return $doc !== 'doc_2';
         });
 
         $this->assertEquals(['doc_1', 'doc_3'], $documents);
+    }
+
+    public function testCount()
+    {
+        $this->engine->shouldReceive('all')
+            ->once()
+            ->andReturn(new ArrayIterator(['one', 'two', 'three']));
+
+        $this->assertEquals(3, $this->store->count());
+
+        // Empty list
+        $this->engine->shouldReceive('all')
+            ->once()
+            ->andReturn(new ArrayIterator());
+
+        $this->assertEquals(0, $this->store->count());
     }
 }

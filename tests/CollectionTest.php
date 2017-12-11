@@ -97,4 +97,15 @@ class CollectionTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals([$doc1, $doc2], $this->collection->find(['field' => 'test']));
     }
+
+    public function testFindAll()
+    {
+        $this->parser->shouldReceive('parse')
+            ->once()
+            ->andReturn(m::mock(ExpressionInterface::class));
+            
+        $this->store->shouldReceive('scan')->once();
+
+        $this->collection->find();
+    }
 }

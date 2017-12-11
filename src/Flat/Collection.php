@@ -124,9 +124,19 @@ class Collection
      *
      * @return array The array of results.
      */
-    public function find($criteria)
+    public function find($criteria = [])
     {
         return $this->onMatch($criteria);
+    }
+
+    /**
+     * Count documents in the collection.
+     *
+     * @return int The number of documents.
+     */
+    public function count()
+    {
+        return $this->store->count();
     }
 
     protected function onMatch($criteria, $limit = null)

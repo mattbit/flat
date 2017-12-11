@@ -81,6 +81,11 @@ class DocumentStore
         return $this->engine->get($id, $this->namespace);
     }
 
+    public function count()
+    {
+        return iterator_count($this->engine->all($this->namespace));
+    }
+
     public function scan(callable $filter = null, $limit = null)
     {
         $documents = [];
