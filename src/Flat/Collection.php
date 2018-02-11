@@ -91,9 +91,14 @@ class Collection
         $limit = $multiple ? 1 : null;
         $documents = $this->onMatch($criteria, $limit);
 
+        $count = 0;
         foreach ($documents as $document) {
+            $updated->setId($document->getId());
             $this->store->update($updated);
+            $count++;
         }
+
+        return $count;
     }
 
     /**
@@ -110,11 +115,13 @@ class Collection
 
         $documents = $this->onMatch($criteria, $limit);
 
+        $count = 0;
         foreach ($documents as $document) {
             $this->store->remove($document->get('_id'));
+            $count++;
         }
 
-        return true;
+        return $count;
     }
 
     /**
