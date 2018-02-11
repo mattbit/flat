@@ -132,11 +132,17 @@ class Collection
     /**
      * Count documents in the collection.
      *
+     * @param array $criteria
+     * 
      * @return int The number of documents.
      */
-    public function count()
+    public function count($criteria = [])
     {
-        return $this->store->count();
+        if (empty($criteria)) {
+            return $this->store->count();
+        }
+
+        return count($this->onMatch($criteria));
     }
 
     protected function onMatch($criteria, $limit = null)
